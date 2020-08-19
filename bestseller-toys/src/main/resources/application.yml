@@ -6,8 +6,6 @@ server:
 spring:
   profiles:
     active: chaos-monkey
-  application:
-    name: toys-bestseller
   cloud:
     kubernetes:
       enabled: false
