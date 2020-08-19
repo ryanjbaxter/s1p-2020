@@ -29,11 +29,11 @@ public class GatewayApplication {
 	public RouteLocator routes(RouteLocatorBuilder builder) {
 		return builder.routes()
 				.route(p -> p.path("/hotdeals**").filters(f ->
-						f.hystrix(c -> c.setName("hotdeals").setFallbackUri("forward:/fallback"))).uri("lb://hotdeals"))
+						f.circuitBreaker(c -> c.setName("hostdeals").setFallbackUri("forward:/fallback"))).uri("lb://hotdeals"))
 				.route(p -> p.path("/fashion/**").filters(f ->
-						f.hystrix(c -> c.setName("fashion").setFallbackUri("forward:/fallback"))).uri("lb://fashion-bestseller"))
+						f.circuitBreaker(c -> c.setName("fashion").setFallbackUri("forward:/fallback"))).uri("lb://fashion-bestseller"))
 				.route(p -> p.path("/toys/**").filters(f ->
-						f.hystrix(c -> c.setName("toys").setFallbackUri("forward:/fallback"))).uri("lb://toys-bestseller"))
+						f.circuitBreaker(c -> c.setName("toys").setFallbackUri("forward:/fallback"))).uri("lb://toys-bestseller"))
 				.build();
 	}
 
