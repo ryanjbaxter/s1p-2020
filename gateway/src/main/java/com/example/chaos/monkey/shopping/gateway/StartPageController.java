@@ -4,6 +4,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.Collections;
 import java.util.function.Function;
+
 import org.springframework.boot.web.context.WebServerInitializedEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.ParameterizedTypeReference;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
+
 import com.example.chaos.monkey.shopping.domain.Product;
 import com.example.chaos.monkey.shopping.gateway.domain.ProductResponse;
 import com.example.chaos.monkey.shopping.gateway.domain.ResponseType;
@@ -24,11 +26,11 @@ import com.example.chaos.monkey.shopping.gateway.domain.Startpage;
 public class StartPageController implements ApplicationListener<WebServerInitializedEvent> {
 
 	private ParameterizedTypeReference<Product> productParameterizedTypeReference =
-			new ParameterizedTypeReference<Product>() {};
+			new ParameterizedTypeReference<Product>() { };
 
 	private Function<ClientResponse, Mono<ProductResponse>> responseProcessor = clientResponse -> {
 		HttpHeaders headers = clientResponse.headers().asHttpHeaders();
-		if(headers.containsKey("fallback") && headers.get("fallback").contains("true")) {
+		if (headers.containsKey("fallback") && headers.get("fallback").contains("true")) {
 			return Mono.just(new ProductResponse(ResponseType.FALLBACK, Collections.emptyList()));
 		}
 		return clientResponse.bodyToFlux(productParameterizedTypeReference).collectList()
@@ -53,12 +55,14 @@ public class StartPageController implements ApplicationListener<WebServerInitial
 					t.printStackTrace();
 					return Mono.just(errorResponse);
 				});
-		Mono<ProductResponse> fashionBestSellers = client.get().uri("/fashion/bestseller").exchange().flatMap(responseProcessor)
+		Mono<ProductResponse> fashionBestSellers = client.get().uri("/fashion/bestseller").exchange()
+				.flatMap(responseProcessor)
 				.onErrorResume(t -> {
 					t.printStackTrace();
 					return Mono.just(errorResponse);
 				});
-		Mono<ProductResponse> toysBestSellers = client.get().uri("/toys/bestseller").exchange().flatMap(responseProcessor)
+		Mono<ProductResponse> toysBestSellers = client.get().uri("/toys/bestseller").exchange()
+				.flatMap(responseProcessor)
 				.onErrorResume(t -> {
 					t.printStackTrace();
 					return Mono.just(errorResponse);

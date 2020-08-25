@@ -14,6 +14,7 @@
         <module>gateway</module>
         <module>shared</module>
         <module>config-server</module>
+        <module>twillio-notifier</module>
     </modules>
     <packaging>pom</packaging>
 

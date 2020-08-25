@@ -9,7 +9,6 @@ import java.util.function.Predicate;
 
 import com.example.chaos.monkey.shopping.domain.Product;
 import com.example.chaos.monkey.shopping.domain.ProductCategory;
-import com.example.chaos.monkey.shopping.gateway.domain.ProductResponse;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.timelimiter.TimeLimiterConfig;
 import org.apache.commons.logging.Log;
@@ -17,8 +16,12 @@ import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.bus.BusProperties;
+import com.example.chaos.monkey.shopping.domain.CBFailureEvent;
+import org.springframework.cloud.bus.jackson.RemoteApplicationEventScan;
 import org.springframework.cloud.circuitbreaker.resilience4j.ReactiveResilience4JCircuitBreakerFactory;
 import org.springframework.cloud.client.circuitbreaker.Customizer;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
@@ -30,7 +33,9 @@ import org.springframework.cloud.gateway.filter.factory.rewrite.RewriteFunction;
 import org.springframework.cloud.gateway.handler.predicate.BetweenRoutePredicateFactory;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.HttpMessageReader;
@@ -54,7 +59,8 @@ public class GatewayApplication {
 	@Bean
 	public AddProductFilterFactory addProductFilterFactory(ServerCodecConfigurer codecConfigurer, Set<MessageBodyDecoder> bodyDecoders,
 			Set<MessageBodyEncoder> bodyEncoders, BetweenRoutePredicateFactory betweenRoutePredicateFactory) {
-		return new AddProductFilterFactory(codecConfigurer.getReaders(), bodyDecoders, bodyEncoders, betweenRoutePredicateFactory);
+		return new AddProductFilterFactory(codecConfigurer
+				.getReaders(), bodyDecoders, bodyEncoders, betweenRoutePredicateFactory);
 	}
 
 	@Bean
@@ -65,9 +71,11 @@ public class GatewayApplication {
 						f.circuitBreaker(c -> c.setName("hostdeals").setFallbackUri("forward:/fallback"))
 								.filter(addProductFilter)).uri("lb://hotdeals"))
 				.route(p -> p.path("/fashion/**").filters(f ->
-						f.circuitBreaker(c -> c.setName("fashion").setFallbackUri("forward:/fallback"))).uri("lb://fashion-bestseller"))
+						f.circuitBreaker(c -> c.setName("fashion").setFallbackUri("forward:/fallback")))
+						.uri("lb://fashion-bestseller"))
 				.route(p -> p.path("/toys/**").filters(f ->
-						f.circuitBreaker(c -> c.setName("toys").setFallbackUri("forward:/fallback"))).uri("lb://toys-bestseller"))
+						f.circuitBreaker(c -> c.setName("toys").setFallbackUri("forward:/fallback")))
+						.uri("lb://toys-bestseller"))
 				.build();
 	}
 
@@ -81,7 +89,7 @@ public class GatewayApplication {
 
 
 	@Bean
-	public Customizer<ReactiveResilience4JCircuitBreakerFactory> toysCustomizer() {
+	public Customizer<ReactiveResilience4JCircuitBreakerFactory> toysCustomizer(ApplicationEventPublisher applicationEventPublisher, BusProperties busProperties) {
 		return factory -> {
 			factory.configure(builder -> {
 				builder
@@ -89,7 +97,8 @@ public class GatewayApplication {
 						.circuitBreakerConfig(CircuitBreakerConfig.custom()
 								.failureRateThreshold(1) //If the failure rate is greater than 1% open the CB
 								.minimumNumberOfCalls(1) //Only 1 call needs to be made before the failure rate threshold is computer
-								.waitDurationInOpenState(Duration.ofSeconds(5)) //Wait five seconds before transitioning the CB from open to half opened to allow calls to go through
+								.waitDurationInOpenState(Duration
+										.ofSeconds(5)) //Wait five seconds before transitioning the CB from open to half opened to allow calls to go through
 								.build());
 
 			}, "toys");
@@ -98,7 +107,10 @@ public class GatewayApplication {
 							.onError(event -> {
 								LOG.warn(circuitBreaker.getMetrics().getFailureRate());
 								LOG.warn(circuitBreaker.getMetrics().getNumberOfFailedCalls());
-								LOG.warn("Toys circuit breaker had an error " + circuitBreaker.getState(), event.getThrowable());
+								applicationEventPublisher
+										.publishEvent(new CBFailureEvent(event, busProperties.getId()));
+								LOG.warn("Toys circuit breaker had an error " + circuitBreaker.getState(), event
+										.getThrowable());
 							})
 							.onSuccess(event -> {
 								LOG.info("No error here");
@@ -108,6 +120,7 @@ public class GatewayApplication {
 
 	class AddProductFilterFactory extends ModifyResponseBodyGatewayFilterFactory {
 		private BetweenRoutePredicateFactory betweenRoutePredicateFactory;
+
 		AddProductFilterFactory(List<HttpMessageReader<?>> messageReaders, Set<MessageBodyDecoder> messageBodyDecoders, Set<MessageBodyEncoder> messageBodyEncoders, BetweenRoutePredicateFactory betweenRoutePredicateFactory) {
 			super(messageReaders, messageBodyDecoders, messageBodyEncoders);
 			this.betweenRoutePredicateFactory = betweenRoutePredicateFactory;
@@ -129,13 +142,14 @@ public class GatewayApplication {
 
 		public AddProductRewriteFunction(BetweenRoutePredicateFactory betweenRoutePredicateFactory) {
 			ZonedDateTime now = ZonedDateTime.now();
-			this.between = betweenRoutePredicateFactory.apply(new BetweenRoutePredicateFactory.Config().setDatetime1(now).setDatetime2(now.plusMinutes(1)));
+			this.between = betweenRoutePredicateFactory
+					.apply(new BetweenRoutePredicateFactory.Config().setDatetime1(now)
+							.setDatetime2(now.plusMinutes(1)));
 		}
 
 		@Override
 		public Publisher<List> apply(ServerWebExchange exchange, List products) {
-			if(between.test(exchange)) {
-				ProductResponse modified = new ProductResponse();
+			if (between.test(exchange)) {
 				Product secret = new Product();
 				secret.setId(123);
 				secret.setCategory(ProductCategory.TOYS);
@@ -145,6 +159,12 @@ public class GatewayApplication {
 			}
 			return Mono.just(products);
 		}
+	}
+
+	@Configuration
+	@RemoteApplicationEventScan(basePackageClasses = {CBFailureEvent.class})
+	class BusConfiguration {
+
 	}
 }
 
