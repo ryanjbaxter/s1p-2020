@@ -1,7 +1,22 @@
 server:
   port: 9080
 spring:
+  application:
+    name: shop
   cloud:
+#    discovery:
+#      client:
+#        simple:
+#          instances:
+#            fashion-bestseller[0]:
+#              uri: http://localhost:8082
+#            fashion-bestseller[1]:
+#              uri: http://localhost:9999
     loadbalancer:
+#      cache:
+#        ttl: 10s
+#        caffeine:
+#          spec: expireAfterWrite=30s
+#        enabled: false
       ribbon:
         enabled: false
