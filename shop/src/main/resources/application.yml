@@ -1,0 +1,7 @@
+server:
+  port: 9080
+spring:
+  cloud:
+    loadbalancer:
+      ribbon:
+        enabled: false
