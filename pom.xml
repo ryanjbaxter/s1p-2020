@@ -15,7 +15,8 @@
         <module>shared</module>
         <module>config-server</module>
         <module>twillio-notifier</module>
-    </modules>
+		<module>shop</module>
+	</modules>
     <packaging>pom</packaging>
 
 
