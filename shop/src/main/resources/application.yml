@@ -20,3 +20,6 @@ spring:
 #        enabled: false
       ribbon:
         enabled: false
+logging:
+  level:
+    com.example.chaos.monkey.shopping.shop.FashionBestsellerClient: DEBUG

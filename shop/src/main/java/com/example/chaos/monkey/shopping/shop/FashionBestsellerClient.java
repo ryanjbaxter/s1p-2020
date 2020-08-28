@@ -10,10 +10,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 /**
  * @author Olga Maciaszek-Sharma
  */
-@FeignClient("fashion-bestseller")
+@FeignClient(value = "fashion-bestseller", path = "/fashion/bestseller"
+//		, configuration = CustomFeignClientConfiguration.class
+)
 public interface FashionBestsellerClient {
 
 
-	@GetMapping("/fashion/bestseller")
+	@GetMapping
 	List<Product> getBestsellingProducts();
+
+	@GetMapping("/month")
+	List<Product> getBestsellersOfTheMonth();
 }
