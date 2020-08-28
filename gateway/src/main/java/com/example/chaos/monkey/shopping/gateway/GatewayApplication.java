@@ -9,6 +9,7 @@ import java.util.function.Predicate;
 
 import com.example.chaos.monkey.shopping.domain.Product;
 import com.example.chaos.monkey.shopping.domain.ProductCategory;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.timelimiter.TimeLimiterConfig;
 import org.apache.commons.logging.Log;
@@ -16,12 +17,8 @@ import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.bus.BusProperties;
-import com.example.chaos.monkey.shopping.domain.CBFailureEvent;
-import org.springframework.cloud.bus.jackson.RemoteApplicationEventScan;
 import org.springframework.cloud.circuitbreaker.resilience4j.ReactiveResilience4JCircuitBreakerFactory;
 import org.springframework.cloud.client.circuitbreaker.Customizer;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
@@ -33,9 +30,7 @@ import org.springframework.cloud.gateway.filter.factory.rewrite.RewriteFunction;
 import org.springframework.cloud.gateway.handler.predicate.BetweenRoutePredicateFactory;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.HttpMessageReader;
@@ -89,7 +84,7 @@ public class GatewayApplication {
 
 
 	@Bean
-	public Customizer<ReactiveResilience4JCircuitBreakerFactory> toysCustomizer(ApplicationEventPublisher applicationEventPublisher, BusProperties busProperties) {
+	public Customizer<ReactiveResilience4JCircuitBreakerFactory> toysCustomizer() {
 		return factory -> {
 			factory.configure(builder -> {
 				builder
@@ -102,19 +97,25 @@ public class GatewayApplication {
 								.build());
 
 			}, "toys");
-			factory.addCircuitBreakerCustomizer(
-					circuitBreaker -> circuitBreaker.getEventPublisher()
-							.onError(event -> {
-								LOG.warn(circuitBreaker.getMetrics().getFailureRate());
-								LOG.warn(circuitBreaker.getMetrics().getNumberOfFailedCalls());
-								applicationEventPublisher
-										.publishEvent(new CBFailureEvent(event, busProperties.getId()));
-								LOG.warn("Toys circuit breaker had an error " + circuitBreaker.getState(), event
-										.getThrowable());
-							})
-							.onSuccess(event -> {
-								LOG.info("No error here");
-							}), "toys");
+			factory.addCircuitBreakerCustomizer(new Customizer<CircuitBreaker>() {
+				boolean added = false;
+				@Override
+				public void customize(CircuitBreaker circuitBreaker) {
+					if(!added) {
+						circuitBreaker.getEventPublisher()
+								.onError(event -> {
+									LOG.warn(circuitBreaker.getMetrics().getFailureRate());
+									LOG.warn(circuitBreaker.getMetrics().getNumberOfFailedCalls());
+									LOG.warn("Toys circuit breaker had an error " + circuitBreaker.getState(), event
+											.getThrowable());
+								})
+								.onSuccess(event -> {
+									LOG.info("No error here");
+								});
+						added = true;
+					}
+				}
+			}, "toys");
 		};
 	}
 
@@ -159,12 +160,6 @@ public class GatewayApplication {
 			}
 			return Mono.just(products);
 		}
-	}
-
-	@Configuration
-	@RemoteApplicationEventScan(basePackageClasses = {CBFailureEvent.class})
-	class BusConfiguration {
-
 	}
 }
 

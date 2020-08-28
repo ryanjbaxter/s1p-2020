@@ -9,7 +9,7 @@
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>twillio-notifier</artifactId>
+	<artifactId>hotdeals-updater</artifactId>
 
 	<dependencies>
 		<dependency>
