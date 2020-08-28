@@ -14,7 +14,7 @@
         <module>gateway</module>
         <module>shared</module>
         <module>config-server</module>
-        <module>twillio-notifier</module>
+        <module>hotdeals-updater</module>
     </modules>
     <packaging>pom</packaging>
 
