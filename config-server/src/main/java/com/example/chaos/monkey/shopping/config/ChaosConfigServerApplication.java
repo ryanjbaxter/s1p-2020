@@ -23,27 +23,24 @@ public class ChaosConfigServerApplication {
 	}
 
 	@Bean
-	public EnvironmentRepository myEnvironmentRepository() {
-		return new CustomEnvironmentRepository();
+	public EnvironmentRepository environmentRepository() {
+		return new CustomEnvironmentRepositry();
 	}
 
 }
 
-class CustomEnvironmentRepository implements EnvironmentRepository {
+class CustomEnvironmentRepositry implements EnvironmentRepository {
 
-	private Map<String, Object> chaos = new HashMap();
-	private PropertySource propertySource;
+	Map<String, Object> chaos = new HashMap<>();
+	PropertySource propertySource;
 
-	public CustomEnvironmentRepository() {
-		chaos.put("chaos.monkey.enabled", true);
-		this.propertySource = new PropertySource("chaos-toys-bestseller", chaos);
+	public CustomEnvironmentRepositry() {
+		this.chaos.put("chaos.monkey.enabled", true);
+		propertySource = new PropertySource("toys-bestseller-chaos", this.chaos);
 	}
 
+	@Override
 	public Environment findOne(String application, String profile, String label) {
-		return findOne(application, profile, label, false);
-	}
-
-	public Environment findOne(String application, String profile, String label, boolean includeOrigin) {
 		Environment env = new Environment(application, profile);
 		if("toys-bestseller".equalsIgnoreCase(application)) {
 			env.add(propertySource);
@@ -51,3 +48,4 @@ class CustomEnvironmentRepository implements EnvironmentRepository {
 		return env;
 	}
 }
+
