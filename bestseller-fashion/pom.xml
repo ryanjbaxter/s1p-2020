@@ -77,6 +77,7 @@
 							<baseClassFQN>com.example.chaos.monkey.shopping.bestseller.fashion.FashionContractsBaseTestClass</baseClassFQN>
 						</baseClassMapping>
 					</baseClassMappings>
+					<failOnInProgress>false</failOnInProgress>
 				</configuration>
 			</plugin>
 		</plugins>
