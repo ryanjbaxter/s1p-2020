@@ -9,6 +9,9 @@ Contract.make {
 	}
 	response {
 		status OK()
+		headers {
+			contentType("application/json")
+		}
 		body([
 				[
 						id      : $(anyNumber()),

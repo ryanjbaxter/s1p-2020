@@ -1,0 +1,10 @@
+
+
+stubrunner:
+  idsToServiceIds:
+    bestseller-fashion: fashion-bestseller
+spring:
+  cloud:
+    loadbalancer:
+      ribbon:
+        enabled: false
