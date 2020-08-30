@@ -18,8 +18,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @AutoConfigureStubRunner(ids = {
 		"com.example.chaos.monkey.shopping:bestseller-fashion"},
 		stubsMode = StubRunnerProperties.StubsMode.LOCAL
-		, repositoryRoot = "stubs://file://home/olga/IdeaProjects/s1p-2020-olga/shop/src/test/resources/contractsAtRuntime"
-		, generateStubs = true
+//		, repositoryRoot = "stubs://file://home/olga/IdeaProjects/s1p-2020-olga/shop/src/test/resources/contractsAtRuntime"
+//		, generateStubs = true
 )
 @SpringBootTest
 class ShopNonExistentEndpointIntegrationTests {
