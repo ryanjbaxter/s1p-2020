@@ -6,6 +6,9 @@ import com.example.chaos.monkey.shopping.domain.Product;
 
 import org.springframework.cloud.openfeign.FeignClientsConfiguration;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,5 +36,12 @@ class ShopController {
 	@GetMapping("/fashion/bestsellers/month")
 	List<Product> getBestsellerOfTheMonth() {
 		return fashionBestsellerClient.getBestsellersOfTheMonth();
+	}
+
+	@GetMapping(path = "/fashion/bestsellers/page")
+	String getPageInfo() {
+		Pageable pageable = PageRequest.of(5, 20, Sort
+				.by(Sort.Direction.DESC, "name"));
+		return fashionBestsellerClient.getPageInfo(pageable);
 	}
 }
