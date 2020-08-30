@@ -1,12 +1,11 @@
-//package contracts.fashion
+//package contracts.toys
 //
 //import org.springframework.cloud.contract.spec.Contract
 //
 //Contract.make {
-//	inProgress()
 //	request {
 //		method GET()
-//		url '/fashion/bestseller/year'
+//		url '/toys/bestseller/month'
 //	}
 //	response {
 //		status OK()
@@ -17,7 +16,7 @@
 //				[
 //						id      : $(anyNumber()),
 //						name    : 'Test',
-//						category: 'FASHION'
+//						category: 'TOYS'
 //				]
 //		])
 //		bodyMatchers {
