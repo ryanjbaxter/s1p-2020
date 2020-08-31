@@ -3,7 +3,7 @@
 //import org.springframework.cloud.contract.spec.Contract
 //
 //Contract.make {
-//	inProgress()
+////	inProgress()
 //	request {
 //		method GET()
 //		url '/fashion/bestseller/year'
