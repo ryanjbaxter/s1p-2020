@@ -6,11 +6,10 @@ import java.util.Map;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.config.environment.Environment;
+import org.springframework.cloud.config.environment.PropertySource;
 import org.springframework.cloud.config.server.EnableConfigServer;
 import org.springframework.cloud.config.server.environment.EnvironmentRepository;
 import org.springframework.context.annotation.Bean;
-import org.springframework.core.env.MapPropertySource;
-import org.springframework.cloud.config.environment.PropertySource;
 
 /**
  * @author Ryan Baxter
@@ -24,26 +23,29 @@ public class ChaosConfigServerApplication {
 	}
 
 	@Bean
-	public EnvironmentRepository myEnvironmentRepository() {
-		return new CustomEnvironmentRepository();
+	public EnvironmentRepository environmentRepository() {
+		return new CustomEnvironmentRepositry();
 	}
 
 }
 
-class CustomEnvironmentRepository implements EnvironmentRepository {
+class CustomEnvironmentRepositry implements EnvironmentRepository {
 
-	public Environment findOne(String application, String profile, String label) {
-		return findOne(application, profile, label, false);
+	Map<String, Object> chaos = new HashMap<>();
+	PropertySource propertySource;
+
+	public CustomEnvironmentRepositry() {
+		this.chaos.put("chaos.monkey.enabled", true);
+		propertySource = new PropertySource("toys-bestseller-chaos", this.chaos);
 	}
 
-	public Environment findOne(String application, String profile, String label, boolean includeOrigin) {
-		Map<String, Object> myMap = new HashMap<String, Object>();
-		myMap.put("hello", "world");
-		myMap.put("foo", "bar");
-		myMap.put("chaos.monkey.enabled", true);
-		PropertySource propertySource = new PropertySource("custom", myMap);
+	@Override
+	public Environment findOne(String application, String profile, String label) {
 		Environment env = new Environment(application, profile);
-		env.add(propertySource);
+		if("toys-bestseller".equalsIgnoreCase(application)) {
+			env.add(propertySource);
+		}
 		return env;
 	}
 }
+
