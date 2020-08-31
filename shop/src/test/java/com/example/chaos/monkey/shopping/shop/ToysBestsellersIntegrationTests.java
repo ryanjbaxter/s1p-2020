@@ -16,20 +16,17 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Olga Maciaszek-Sharma
  */
 @SpringBootTest
-@AutoConfigureStubRunner(ids = {"com.example.chaos.monkey.shopping:bestseller-fashion:+:stubs"},
-stubsMode = StubRunnerProperties.StubsMode.LOCAL)
-class ShopIntegrationTests {
-
+@AutoConfigureStubRunner(ids = {"com.example.chaos.monkey.shopping:bestseller-toys:+:stubs"},
+		stubsMode = StubRunnerProperties.StubsMode.LOCAL)
+public class ToysBestsellersIntegrationTests {
 
 	@Autowired
-	FashionBestsellerClient fashionBestsellerClient;
+	ToysBestsellerClient toysBestsellerClient;
 
 	@Test
-	void shouldGetFashionBestsellers() {
-		List<Product> fashionBestsellers = fashionBestsellerClient
-				.getBestsellingProducts();
+	void shouldFetchBestsellingToys() {
+		List<Product> bestsellingToys = toysBestsellerClient.getBestsellerProducts();
 
-		assertThat(fashionBestsellers).isNotEmpty();
+		assertThat(bestsellingToys).isNotEmpty();
 	}
-
 }

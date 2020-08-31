@@ -1,6 +1,7 @@
 stubrunner:
   idsToServiceIds:
     bestseller-fashion: fashion-bestseller
+    bestseller-toys: toys-bestseller
 spring:
   cloud:
     loadbalancer:

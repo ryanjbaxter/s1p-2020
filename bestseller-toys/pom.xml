@@ -73,13 +73,20 @@
 				<version>2.2.4.RELEASE</version>
 				<extensions>true</extensions>
 				<configuration>
+					<contractsMode>REMOTE</contractsMode>
+					<contractsRepositoryUrl>
+						git://git@github.com:OlgaMaciaszek/s1p-2020-contracts.git
+					</contractsRepositoryUrl>
+					<contractDependency>
+						<groupId>com.example.chaos.monkey.shopping</groupId>
+						<classifier>stubs</classifier>
+						<artifactId>bestseller-toys</artifactId>
+						<version>1.0-SNAPSHOT</version>
+					</contractDependency>
 					<testFramework>JUNIT</testFramework>
-					<baseClassMappings>
-						<baseClassMapping>
-							<contractPackageRegex>.*toys.*</contractPackageRegex>
-							<baseClassFQN>com.example.chaos.monkey.shopping.bestseller.toys.ToysContractsBaseTestClass</baseClassFQN>
-						</baseClassMapping>
-					</baseClassMappings>
+					<baseClassForTests>
+						com.example.chaos.monkey.shopping.bestseller.toys.ToysContractsBaseTestClass
+					</baseClassForTests>
 				</configuration>
 			</plugin>
 		</plugins>

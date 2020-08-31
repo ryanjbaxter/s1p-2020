@@ -16,7 +16,7 @@
         <module>config-server</module>
         <module>hotdeals-updater</module>
         <module>shop</module>
-    </modules>
+	</modules>
     <packaging>pom</packaging>
 
 
