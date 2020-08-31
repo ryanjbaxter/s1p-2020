@@ -19,7 +19,7 @@ spring:
 #          spec: expireAfterWrite=30s
 #        enabled: false
       ribbon:
-        enabled: false
+        enabled: true
 logging:
   level:
     com.example.chaos.monkey.shopping.shop.FashionBestsellerClient: DEBUG
