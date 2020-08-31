@@ -2,15 +2,16 @@ package com.example.chaos.monkey.shopping;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import feign.Logger;
 import feign.codec.Decoder;
 import feign.jackson.JacksonDecoder;
 
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 
 /**
  * @author Olga Maciaszek-Sharma
  */
+@Import(FeignFullLoggingConfiguration.class)
 public class CustomFeignClientConfiguration {
 
 	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -22,11 +23,6 @@ public class CustomFeignClientConfiguration {
 	@Bean
 	public Decoder decoder() {
 		return new JacksonDecoder(OBJECT_MAPPER);
-	}
-
-	@Bean
-	public Logger.Level feignLoggerLevel() {
-		return Logger.Level.FULL;
 	}
 
 }

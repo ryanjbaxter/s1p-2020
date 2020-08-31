@@ -1,11 +1,11 @@
-package contracts.fashion
+package contractsAtRuntime
 
 import org.springframework.cloud.contract.spec.Contract
 
 Contract.make {
 	request {
 		method GET()
-		url '/fashion/bestseller'
+		url '/fashion/bestseller/week'
 	}
 	response {
 		status OK()
