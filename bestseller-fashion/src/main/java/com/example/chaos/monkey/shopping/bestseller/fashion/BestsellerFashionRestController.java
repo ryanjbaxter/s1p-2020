@@ -8,6 +8,9 @@ import com.example.chaos.monkey.shopping.domain.Product;
 import com.example.chaos.monkey.shopping.domain.ProductBuilder;
 import com.example.chaos.monkey.shopping.domain.ProductCategory;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,6 +24,17 @@ public class BestsellerFashionRestController {
 
 	@GetMapping("/bestseller")
 	public List<Product> getBestsellerProducts() {
+		return getBestsellingProducts();
+	}
+
+	@GetMapping("/bestseller/page")
+	public Page<Product> getPagedBestsellerProducts(Pageable pageable) {
+		return new PageImpl<>(getBestsellingProducts(), pageable, getBestsellerProducts()
+				.size());
+	}
+
+
+	private List<Product> getBestsellingProducts() {
 		AtomicLong aLong = new AtomicLong(4);
 
 		ProductBuilder productBuilder = new ProductBuilder();
